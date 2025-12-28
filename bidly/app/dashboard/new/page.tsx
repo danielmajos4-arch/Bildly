@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -44,7 +45,8 @@ import {
   MessageSquare,
   Plus,
   X,
-  User
+  User,
+  SlidersHorizontal
 } from "lucide-react";
 
 const PLATFORMS = [
@@ -64,6 +66,36 @@ const LOADING_TIPS = [
   "Making it sound human...",
   "Adding your unique touch...",
   "Polishing the call-to-action...",
+];
+
+const TONE_OPTIONS = [
+  { 
+    value: "professional", 
+    label: "Professional", 
+    description: "Formal, polished, business-focused",
+    bestFor: "Email marketing, consulting, enterprise clients",
+    icon: Briefcase,
+    color: "border-blue-500/50 bg-blue-500/5 hover:bg-blue-500/10",
+    selectedColor: "border-blue-500 bg-blue-500/15 ring-2 ring-blue-500/20",
+  },
+  { 
+    value: "friendly", 
+    label: "Friendly", 
+    description: "Warm, conversational, approachable",
+    bestFor: "Developers, creative work, startups",
+    icon: Heart,
+    color: "border-green-500/50 bg-green-500/5 hover:bg-green-500/10",
+    selectedColor: "border-green-500 bg-green-500/15 ring-2 ring-green-500/20",
+  },
+  { 
+    value: "bold", 
+    label: "Bold", 
+    description: "Confident, direct, results-focused",
+    bestFor: "Competitive bids, sales-oriented niches",
+    icon: Zap,
+    color: "border-orange-500/50 bg-orange-500/5 hover:bg-orange-500/10",
+    selectedColor: "border-orange-500 bg-orange-500/15 ring-2 ring-orange-500/20",
+  },
 ];
 
 const VARIANT_ICONS = {
@@ -117,6 +149,12 @@ function NewProposalContent() {
   const [loadingTip, setLoadingTip] = useState("");
   const [isCopied, setIsCopied] = useState(false);
   
+  // Tone selection state
+  const [selectedTone, setSelectedTone] = useState<"professional" | "friendly" | "bold">("friendly");
+  
+  // Character limit state (volume control) - default 1500 characters
+  const [characterLimit, setCharacterLimit] = useState(1500);
+  
   // Custom context state
   const [showCustomContext, setShowCustomContext] = useState(false);
   const [portfolioLink, setPortfolioLink] = useState("");
@@ -169,12 +207,14 @@ function NewProposalContent() {
     setAnalysis(null);
 
     try {
-      // Build custom context object
-      const customContext = (portfolioLink || customInstructions || keyPoints.length > 0) ? {
+      // Build custom context object with tone preference and character limit
+      const customContext = {
         portfolioLink: portfolioLink || undefined,
         customInstructions: customInstructions || undefined,
         keyPoints: keyPoints.length > 0 ? keyPoints : undefined,
-      } : undefined;
+        tonePreference: selectedTone,
+        characterLimit: characterLimit,
+      };
 
       const result = await generateProposal({
         jobTitle,
@@ -214,12 +254,14 @@ function NewProposalContent() {
     setAnalysis(null);
 
     try {
-      // Build custom context object
-      const customContext = (portfolioLink || customInstructions || keyPoints.length > 0) ? {
+      // Build custom context object with tone preference and character limit
+      const customContext = {
         portfolioLink: portfolioLink || undefined,
         customInstructions: customInstructions || undefined,
         keyPoints: keyPoints.length > 0 ? keyPoints : undefined,
-      } : undefined;
+        tonePreference: selectedTone,
+        characterLimit: characterLimit,
+      };
 
       const result = await generateVariants({
         jobTitle,
@@ -287,6 +329,9 @@ function NewProposalContent() {
     setKeyPoints([]);
     setNewKeyPoint("");
     setShowCustomContext(false);
+    // Reset tone and character limit to default
+    setSelectedTone("friendly");
+    setCharacterLimit(1500);
   };
 
   const handleAddKeyPoint = () => {
@@ -561,6 +606,94 @@ function NewProposalContent() {
                   <Badge variant="secondary">{usageCheck.remaining} left</Badge>
                 </div>
               )}
+
+              {/* Tone Selector */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Select Proposal Tone
+                </Label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                  {TONE_OPTIONS.map((tone) => {
+                    const Icon = tone.icon;
+                    const isSelected = selectedTone === tone.value;
+                    return (
+                      <button
+                        key={tone.value}
+                        type="button"
+                        onClick={() => setSelectedTone(tone.value as "professional" | "friendly" | "bold")}
+                        disabled={isGenerating || isGeneratingVariants}
+                        className={`p-3 sm:p-4 rounded-xl border-2 text-left transition-all ${
+                          isSelected ? tone.selectedColor : tone.color
+                        } ${isGenerating || isGeneratingVariants ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                      >
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                            isSelected 
+                              ? tone.value === "professional" 
+                                ? "bg-blue-500 text-white" 
+                                : tone.value === "friendly" 
+                                  ? "bg-green-500 text-white" 
+                                  : "bg-orange-500 text-white"
+                              : "bg-muted"
+                          }`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-medium text-sm">{tone.label}</span>
+                            {isSelected && (
+                              <Check className="w-3.5 h-3.5 text-primary" />
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-[11px] sm:text-xs text-muted-foreground leading-tight">
+                          {tone.description}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {selectedTone === "professional" && "Best for: Email marketing, consulting, enterprise clients"}
+                  {selectedTone === "friendly" && "Best for: Developers, creative work, startups"}
+                  {selectedTone === "bold" && "Best for: Competitive bids, sales-oriented niches"}
+                </p>
+              </div>
+
+              {/* Character Limit Slider (Volume Control) */}
+              <div className="space-y-3 p-4 rounded-xl border bg-muted/30">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2">
+                    <SlidersHorizontal className="w-4 h-4 text-primary" />
+                    Proposal Length
+                  </Label>
+                  <Badge variant="secondary" className="font-mono text-xs">
+                    {characterLimit} chars
+                  </Badge>
+                </div>
+                <Slider
+                  value={[characterLimit]}
+                  onValueChange={(value) => setCharacterLimit(value[0])}
+                  min={500}
+                  max={3000}
+                  step={100}
+                  disabled={isGenerating || isGeneratingVariants}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
+                  <span>Short (500)</span>
+                  <span className="text-primary font-medium">
+                    {characterLimit <= 800 ? "Punchy & Direct" : 
+                     characterLimit <= 1200 ? "Concise" : 
+                     characterLimit <= 1800 ? "Balanced" : 
+                     characterLimit <= 2400 ? "Detailed" : "Comprehensive"}
+                  </span>
+                  <span>Long (3000)</span>
+                </div>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
+                  Upwork allows up to 5,000 characters. Keep it concise for better engagement.
+                </p>
+              </div>
 
               {/* Generate Buttons */}
               <div className="space-y-2 sm:space-y-3 min-w-0 max-w-full">

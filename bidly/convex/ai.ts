@@ -58,6 +58,58 @@ function getStyleDescription(style: string | undefined): string {
   return styles[style || "professional"] || styles.professional;
 }
 
+// Helper function to get detailed tone instructions for proposal generation
+function getToneInstructions(tone: string | undefined): { style: string; guidelines: string } {
+  const tones: Record<string, { style: string; guidelines: string }> = {
+    professional: {
+      style: "Formal, polished, and business-focused. Use industry terminology appropriately. Structured and organized. Maintain a serious, competent tone throughout.",
+      guidelines: `
+**PROFESSIONAL TONE REQUIREMENTS:**
+- Use formal language but avoid being stiff or robotic
+- Lead with expertise and credentials naturally
+- Use industry-specific terminology where appropriate
+- Structure your proposal clearly with logical flow
+- Avoid contractions where possible (use "I am" instead of "I'm")
+- Focus on deliverables, timelines, and professional outcomes
+- Address the client formally if name unknown
+- Emphasize reliability, precision, and attention to detail
+- Use phrases like "I would recommend", "Based on my experience", "The proposed approach"
+- End with a professional call-to-action about next steps`
+    },
+    friendly: {
+      style: "Warm and conversational. Use 'you' and 'we' language. Approachable but still professional. Personable and relatable.",
+      guidelines: `
+**FRIENDLY TONE REQUIREMENTS:**
+- Use natural contractions (I'm, you're, we'll, don't, won't)
+- Be personable and show genuine enthusiasm
+- Use "you/we" language to build connection
+- Start with a warm, casual greeting (Hey! Hi there!)
+- Share personality without being unprofessional
+- Use casual expressions where appropriate ("pretty much", "honestly", "sounds great")
+- Ask genuine questions that show interest
+- Focus on collaboration and partnership
+- Use phrases like "I'd love to", "This sounds exciting", "Happy to chat more"
+- End with a friendly, approachable call-to-action`
+    },
+    bold: {
+      style: "Confident and direct. Lead with capabilities. Assertive without being aggressive. Results-focused and action-oriented.",
+      guidelines: `
+**BOLD TONE REQUIREMENTS:**
+- Lead with your strongest credentials and achievements
+- Use confident, assertive language (avoid hedging words like "maybe", "possibly", "I think")
+- Focus heavily on results, ROI, and measurable outcomes
+- Be direct and get to the point quickly
+- Use power words: "proven", "delivered", "achieved", "guaranteed", "expert"
+- Challenge the status quo or offer a unique perspective
+- Show you're selective about projects (implies high demand)
+- Use phrases like "Here's what I'll deliver", "My approach has consistently", "I guarantee"
+- End with a strong, confident call-to-action that creates urgency
+- Don't be afraid to be slightly provocative or challenge assumptions`
+    },
+  };
+  return tones[tone || "friendly"] || tones.friendly;
+}
+
 // Helper function to get platform-specific tone
 function getPlatformTone(platform: string): string {
   const tones: Record<string, string> = {
@@ -84,6 +136,7 @@ export const generateProposal = action({
       customInstructions: v.optional(v.string()),
       keyPoints: v.optional(v.array(v.string())),
       tonePreference: v.optional(v.string()),
+      characterLimit: v.optional(v.number()),
     })),
   },
   handler: async (ctx, args): Promise<{ proposal: string; wordCount: number; characterCount: number }> => {
@@ -109,6 +162,17 @@ export const generateProposal = action({
     // Build a rich context from user profile
     const profileContext = buildProfileContext(userProfile);
     
+    // Get the tone instructions based on user selection (defaults to friendly)
+    const selectedTone = args.customContext?.tonePreference || "friendly";
+    const toneInstructions = getToneInstructions(selectedTone);
+    
+    // Get character limit (default 1500)
+    const characterLimit = args.customContext?.characterLimit || 1500;
+    const wordEstimate = Math.round(characterLimit / 5); // Rough estimate: 5 chars per word
+    
+    // Generate a random approach seed for variety
+    const approachSeed = Math.floor(Math.random() * 10);
+    
     // Build custom context section if provided
     const customContextSection = args.customContext ? `
 ═══════════════════════════════════════════════════════
@@ -123,11 +187,37 @@ ${args.customContext.customInstructions}
 ${args.customContext.keyPoints && args.customContext.keyPoints.length > 0 ? `
 Key points I want mentioned:
 ${args.customContext.keyPoints.map(point => `• ${point}`).join("\n")}` : ""}
-${args.customContext.tonePreference ? `Tone preference: ${args.customContext.tonePreference}` : ""}
 ` : "";
 
+    // Define unique approach strategies for variety
+    const approachStrategies = [
+      { name: "Problem-First", description: "Lead with the client's pain point and your solution", hook: "Start by naming their exact problem, then pivot to your unique solution" },
+      { name: "Story-Led", description: "Open with a brief relevant story or case study", hook: "Share a 1-sentence story about a similar project you crushed" },
+      { name: "Question-Opener", description: "Start with a thought-provoking question", hook: "Ask a question that makes them think 'yes, that's exactly my situation'" },
+      { name: "Bold-Claim", description: "Lead with a confident, specific claim", hook: "Make a bold but believable claim about what you can deliver" },
+      { name: "Insight-First", description: "Open with a valuable insight about their project", hook: "Share an observation or insight that shows you really understand the project" },
+      { name: "Results-Preview", description: "Start with the outcome they'll get", hook: "Paint a picture of the end result before explaining how you'll get there" },
+      { name: "Pattern-Interrupt", description: "Start unexpectedly to break the mold", hook: "Say something unexpected that makes them pause and pay attention" },
+      { name: "Social-Proof", description: "Lead with credibility then personalize", hook: "Briefly mention a relevant achievement, then connect it to their needs" },
+      { name: "Direct-Value", description: "Immediately state what you bring to the table", hook: "Skip pleasantries and go straight to your value proposition" },
+      { name: "Empathy-First", description: "Show you understand their situation", hook: "Demonstrate you understand their challenges before offering solutions" },
+    ];
+    
+    const selectedApproach = approachStrategies[approachSeed];
+    
     // Build the SUPERCHARGED prompt
-    const prompt = `You are writing a proposal AS the freelancer described below. Your job is to create an authentic, personalized proposal that sounds like it was genuinely written by this person - not by an AI.
+    const prompt = `You are writing a proposal AS the freelancer described below. Your job is to create an EXCEPTIONAL, personalized proposal that makes the client think "WOW, this person really gets it."
+
+⚡ CRITICAL: Every proposal must be UNIQUE. Never use the same structure or opening twice.
+
+═══════════════════════════════════════════════════════
+🎯 YOUR UNIQUE APPROACH FOR THIS PROPOSAL (MANDATORY):
+═══════════════════════════════════════════════════════
+Strategy: "${selectedApproach.name}"
+Description: ${selectedApproach.description}
+How to execute: ${selectedApproach.hook}
+
+This is your randomly assigned approach - you MUST use this specific strategy to ensure every proposal is different. DO NOT default to generic patterns.
 
 ═══════════════════════════════════════════════════════
 FREELANCER PROFILE (This is who YOU are writing as):
@@ -147,32 +237,58 @@ ${args.jobDescription}
 """
 ${customContextSection}
 ═══════════════════════════════════════════════════════
-YOUR TASK - WRITE AN EXCEPTIONAL PROPOSAL:
+🔍 DEEP CONTEXT ANALYSIS (Do this BEFORE writing):
+═══════════════════════════════════════════════════════
+Read the job post 3 times mentally. On each pass, look for:
+
+**PASS 1 - Surface Level:**
+- What do they literally need done?
+- What technologies/skills are mentioned?
+- What's the budget/timeline?
+
+**PASS 2 - Between the Lines:**
+- What problem are they REALLY trying to solve? (Often different from what they say)
+- What's their experience level? (First-time poster? Repeat client?)
+- What frustrations might they have had with previous freelancers?
+- Are there any red flags or special considerations?
+
+**PASS 3 - Psychological Triggers:**
+- What would make them feel UNDERSTOOD?
+- What would make them feel CONFIDENT in hiring you?
+- What would make them feel EXCITED about working with you?
+- What's the ONE thing that if you addressed it, they'd think "this person gets me"?
+
+Now use these insights to craft your "${selectedApproach.name}" approach.
+
+═══════════════════════════════════════════════════════
+YOUR TASK - WRITE A WOW PROPOSAL:
 ═══════════════════════════════════════════════════════
 
-FIRST, mentally analyze the job post and MINE IT FOR UNIQUE DETAILS:
-1. The client's MAIN problem or goal (what are they really trying to achieve?)
-2. Any SPECIFIC requirements, technologies, or deliverables mentioned
-3. Red flags or special requests in the description
-4. The budget/timeline expectations if mentioned
-5. The client's apparent experience level (new to platform or experienced?)
-6. **CRITICAL - Find ONE unique, specific detail to use in your opening line:**
-   - A specific technology, tool, or framework they mentioned
-   - A pain point or frustration they expressed (even subtly)
-   - A deadline or constraint they're dealing with
-   - Their industry or niche (the more specific, the better)
-   - An unusual phrase or word they used that you can reference
-   - A specific outcome or result they're hoping for
+Using the "${selectedApproach.name}" strategy, identify:
+1. The client's MAIN problem (what are they REALLY trying to achieve?)
+2. SPECIFIC requirements, technologies, or deliverables mentioned
+3. The ONE unique detail you'll use in your opening (critical for standing out)
+4. Any emotional triggers (frustration, urgency, excitement) in their post
+5. What would make them think "finally, someone who gets it"
 
-THEN, write a proposal following this structure:
+NOW, write a proposal using the "${selectedApproach.name}" approach:
 
 1. OPENING (2-3 sentences) - THIS IS THE MOST IMPORTANT PART:
-   - ${args.clientName ? `Address them as "${args.clientName}"` : "Use a warm, casual greeting - 'Hey!' or 'Hi there!' works great"}
+   - ${args.clientName ? `Address them as "${args.clientName}"` : selectedTone === "professional" ? "Use a formal greeting like 'Hello' or 'Good day'" : selectedTone === "bold" ? "Use a confident, direct greeting" : "Use a warm, casual greeting - 'Hey!' or 'Hi there!' works great"}
    - Your FIRST sentence must grab attention by referencing something SPECIFIC from their job post
    - Make them think "finally, someone who actually read my post"
    
-   **HUMANIZED OPENING PATTERNS (use as inspiration, create your own variation):**
-   • "Your [specific thing from job post] caught my eye because..."
+   **OPENING PATTERNS FOR ${selectedTone.toUpperCase()} TONE (use as inspiration, create your own variation):**
+${selectedTone === "professional" ? `   • "I noticed your requirement for [specific thing] and would like to present my approach..."
+   • "Your project requirements align well with my expertise in [relevant skill]..."
+   • "Having reviewed your project specifications, I am confident I can deliver..."
+   • "I understand you are seeking [specific deliverable] - here is how I would approach this..."
+   • "Your emphasis on [specific detail] resonates with my professional experience in..."` : selectedTone === "bold" ? `   • "Here's the bottom line: I've done exactly what you need before, and I'll do it again for you..."
+   • "Stop reading other proposals - I'm your person for this. Here's why..."
+   • "I'll cut to the chase: your [specific requirement] is literally my specialty..."
+   • "You need [specific outcome]? That's what I deliver, consistently..."
+   • "Let me be direct: I saw your post about [specific thing] and I know I can nail this..."
+   • "My portfolio speaks for itself: ${userProfile.portfolio || "[portfolio]"}. Now let me tell you exactly what I'll deliver..."` : `   • "Your [specific thing from job post] caught my eye because..."
    • "Not gonna lie - I got excited when I saw you need [specific requirement]..."
    • "I just finished a similar [project type] and your post made me want to jump in..."
    • "Quick thought on your [specific challenge]: what if we approached it by..."
@@ -180,7 +296,7 @@ THEN, write a proposal following this structure:
    • "The way you described [specific detail] tells me you've been through [pain point] before..."
    • "I know you're probably getting a ton of 'I'm interested' messages - so let me skip that part..."
    • "Before anything - check out my work: ${userProfile.portfolio || "[portfolio]"}. Now, about your [project]..."
-   • "Real talk: your [specific requirement] is exactly what I've been working on lately..."
+   • "Real talk: your [specific requirement] is exactly what I've been working on lately..."`}
 
 2. BODY (Main section - this is where you shine):
    - Explain HOW you would approach their specific project step by step
@@ -207,11 +323,16 @@ THEN, write a proposal following this structure:
    ${userProfile.portfolio ? `- Optionally close with portfolio if not mentioned earlier: "Check out my work when you get a sec: ${userProfile.portfolio}"` : ""}
 
 CRITICAL STYLE GUIDELINES:
-- Writing style: ${getStyleDescription(userProfile.style)}
-- Platform tone: ${getPlatformTone(args.platform)}
-- Length: 250-400 words (quality over quantity - every sentence should earn its place)
+- **SELECTED TONE: ${selectedTone.toUpperCase()}** - This is the most important style directive!
+- Writing style: ${toneInstructions.style}
+- Platform context: ${getPlatformTone(args.platform)}
+- **LENGTH REQUIREMENT: STRICTLY ${characterLimit} characters maximum (~${wordEstimate} words)**
+  - This is a HARD limit set by the user - do NOT exceed ${characterLimit} characters
+  - Quality over quantity - every sentence must earn its place
+  - ${characterLimit <= 800 ? "Keep it punchy and direct - get to the point fast" : characterLimit <= 1200 ? "Be concise - no fluff, just impact" : characterLimit <= 1800 ? "Balanced approach - cover key points without rambling" : "More room to elaborate - but still stay focused"}
 - Sound like a REAL human professional, not an AI or template
 - NO placeholder text like [Your Name], [Project Name], [Timeline]
+${toneInstructions.guidelines}
 
 **BANNED PHRASES - NEVER USE THESE (they scream "AI-generated" or "template"):**
   • "I am interested in your project"
@@ -232,17 +353,42 @@ CRITICAL STYLE GUIDELINES:
   • "Hope this message finds you well"
   • "I hope to hear from you soon"
 
-**HUMANIZATION RULES:**
+**HUMANIZATION RULES (Adapted for ${selectedTone.toUpperCase()} tone):**
 - EVERY sentence should feel personal and specific to THIS job
-- Use contractions naturally (I'm, you're, we'll, don't, won't) - real people use contractions
-- Vary sentence length for natural rhythm - mix short punchy sentences with longer ones
-- Show personality appropriate to the writing style
-- It's okay to start sentences with "And" or "But" - real people do this
+${selectedTone === "professional" ? `- Limit contractions - use "I am", "I will", "do not" for a more formal feel
+- Maintain composed, measured language throughout
+- Avoid casual expressions - stay polished and businesslike` : selectedTone === "bold" ? `- Use contractions selectively - mix formal with conversational
+- Be direct and punchy - avoid hedge words
+- Lead with confidence, not with caveats` : `- Use contractions naturally (I'm, you're, we'll, don't, won't) - real people use contractions
 - Use casual language where appropriate: "gonna", "pretty much", "honestly"
+- It's okay to start sentences with "And" or "But" - real people do this`}
+- Vary sentence length for natural rhythm - mix short punchy sentences with longer ones
+- Show personality appropriate to the ${selectedTone} writing style
 - Ask a real question, not a rhetorical one
 - Reference something from their post that shows you ACTUALLY read it
 
-Write the proposal now (just the proposal text, no additional commentary):`;
+═══════════════════════════════════════════════════════
+🎯 WOW FACTOR TECHNIQUES (Use at least 2):
+═══════════════════════════════════════════════════════
+1. **Mirror their language** - Use exact phrases from their job post
+2. **Show, don't tell** - Instead of "I'm experienced", say "Last month I shipped X which did Y"
+3. **Future-pacing** - Help them visualize success: "Imagine when your users can..."
+4. **Specificity** - Numbers and details beat vague claims: "3 days" not "quickly"
+5. **Pattern interrupt** - Say something unexpected that makes them pause
+6. **Empathy statement** - Show you understand their frustration or goal
+7. **Micro-commitment** - End with an easy "yes" question, not a big ask
+8. **Value-first** - Give them a useful insight before asking for anything
+
+═══════════════════════════════════════════════════════
+⚠️ FINAL CHECK BEFORE WRITING:
+═══════════════════════════════════════════════════════
+- Am I using the "${selectedApproach.name}" approach? 
+- Does my opening grab attention with something SPECIFIC from their post?
+- Would the client think "this person actually read my job post"?
+- Is every sentence earning its place within ${characterLimit} characters?
+- Does this sound like a HUMAN wrote it, not an AI?
+
+Write the proposal now. ONLY output the proposal text, no commentary or explanation:`;
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -954,6 +1100,7 @@ export const generateProposalVariants = action({
       customInstructions: v.optional(v.string()),
       keyPoints: v.optional(v.array(v.string())),
       tonePreference: v.optional(v.string()),
+      characterLimit: v.optional(v.number()),
     })),
   },
   handler: async (ctx, args): Promise<any> => {
@@ -1030,13 +1177,21 @@ Create 3 distinct proposals with different tones:
    - Leads with capabilities, assertive tone
    - Best for: Competitive bids, clients who value confidence
 
+**CHARACTER LIMIT: Each variant must be approximately ${args.customContext?.characterLimit || 1500} characters**
+
 Each proposal should:
-- Be 250-350 words
-- Reference specifics from the job post
-- Include a call-to-action
-- Sound human, not AI-generated
+- Be approximately ${args.customContext?.characterLimit || 1500} characters (STRICT limit)
+- Reference specifics from the job post - use their exact words
+- Include a clear call-to-action
+- Sound 100% human - NEVER sound AI-generated
+- Use different opening strategies for each variant
 - NO placeholder text like [Your Name]
 ${userProfile.portfolio ? `- Naturally mention portfolio: ${userProfile.portfolio}` : ""}
+
+**CRITICAL: Each variant must use a DIFFERENT approach:**
+- Professional: Lead with expertise and structured methodology
+- Friendly: Lead with connection and shared understanding  
+- Bold: Lead with a confident claim or pattern-interrupt
 
 Respond in this exact JSON format:
 {

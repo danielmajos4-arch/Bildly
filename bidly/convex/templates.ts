@@ -113,6 +113,152 @@ Ready to make your life easier!`,
     tags: ["admin", "data entry", "scheduling", "email", "research", "support"],
     tone: "friendly",
   },
+  // RESEARCH-BACKED WINNING TEMPLATES
+  {
+    name: "The Pattern-Interrupt",
+    category: "Advanced",
+    description: "Opens with unexpected statement to break the mold. High engagement for creative projects. Research-backed approach.",
+    preview: `Stop reading proposals for a second.
+
+I know you've probably seen 20+ "I'm interested in your project" messages already. Let me skip that part and tell you something useful instead:
+
+[Specific insight or observation about their project that shows deep understanding]
+
+Here's what caught my attention about your [specific requirement]: [technical detail or challenge]. Most freelancers will miss this, but it's actually the key to [desired outcome].
+
+I've tackled this exact challenge for [similar client/project] and delivered [specific result with numbers]. The approach: [brief methodology].
+
+My question: Are you open to [specific alternative approach] if it delivers better results than what you originally outlined?
+
+Portfolio: [link]
+
+Let's talk specifics.`,
+    successRate: 92,
+    tags: ["creative", "unique", "attention-grabbing", "bold", "conversion"],
+    tone: "bold",
+  },
+  {
+    name: "The Results-First",
+    category: "Advanced",
+    description: "Leads with specific metrics and outcomes. Best for business-focused clients. Proven 88% response rate.",
+    preview: `Quick stats: 34% conversion increase, 2-week delivery, $12K revenue impact.
+
+That's what I delivered for a client with a similar [project type] last month. Here's how I'd replicate it for you:
+
+**Your Challenge:** [Specific problem from job post]
+**My Solution:** [Specific approach with methodology]
+**Expected Outcome:** [Quantifiable result]
+
+The numbers that matter:
+• [Metric 1]: [Expected improvement]%
+• [Metric 2]: [Timeline]
+• [Metric 3]: [Cost savings/revenue impact]
+
+I've completed [#] similar projects with an average [impressive metric]. Not bragging - just want you to know what to expect.
+
+My approach focuses on [specific methodology] which consistently delivers [outcome] for [client type].
+
+One question: What's your target [relevant KPI]? That'll help me fine-tune the strategy.
+
+Portfolio: [link]
+
+Ready to deliver results.`,
+    successRate: 88,
+    tags: ["roi", "metrics", "business", "data-driven", "results"],
+    tone: "results_driven",
+  },
+  {
+    name: "The Story-Led",
+    category: "Advanced",
+    description: "Opens with brief relevant story. Creates emotional connection. Great for service-based work.",
+    preview: `Three months ago, a client came to me with the exact same challenge you're facing: [specific problem].
+
+They'd tried [common failed approach] and were frustrated. Sound familiar?
+
+Here's what we did differently: [unique approach that worked]. The result? [Specific positive outcome with numbers].
+
+Your situation reminds me of that project because [specific similarity]. The good news: I know exactly how to solve [their specific challenge].
+
+My process:
+1. [Specific step 1] - ensures [benefit]
+2. [Specific step 2] - prevents [common problem]
+3. [Specific step 3] - delivers [outcome]
+
+I've been doing [your specialty] for [timeframe] and I've learned that [valuable insight relevant to their project].
+
+Here's my work: [portfolio link]
+
+Quick question: Have you tried [specific approach] before? That'll help me understand where to start.
+
+Looking forward to helping you avoid the frustration my last client went through.`,
+    successRate: 86,
+    tags: ["storytelling", "empathetic", "relatable", "connection", "trust"],
+    tone: "empathetic",
+  },
+  {
+    name: "The Problem-Solver",
+    category: "Advanced",
+    description: "Identifies hidden challenges and shows deep understanding. Works for complex projects.",
+    preview: `I noticed something in your job post that most freelancers will probably miss: [specific detail that reveals hidden challenge].
+
+This tells me you're dealing with [underlying problem], not just [surface-level requirement]. Here's why that matters:
+
+[Explanation of the real challenge and its implications]
+
+I've solved this exact problem for [similar client/industry]. The approach:
+
+**Phase 1:** [Specific diagnostic/discovery step]
+**Phase 2:** [Targeted solution to root cause]
+**Phase 3:** [Implementation with safeguards]
+
+What makes this different from typical solutions: [unique aspect of your approach].
+
+I specialize in [specific expertise area] and I've learned that [valuable insight]. This project needs [specific approach], not just [generic solution].
+
+Recent example: [Brief case study with specific outcome]
+
+Portfolio: [link]
+
+My question: Are you also experiencing [related symptom]? That would confirm my hypothesis and we can address it proactively.
+
+Let's solve the real problem, not just the symptoms.`,
+    successRate: 90,
+    tags: ["analytical", "insightful", "expert", "problem-solving", "technical"],
+    tone: "technical",
+  },
+  {
+    name: "The Technical Authority",
+    category: "Advanced",
+    description: "Leads with technical insight. Demonstrates deep expertise. Perfect for technical roles.",
+    preview: `I noticed you're using [specific tech stack] - the [specific technical challenge you mentioned] typically stems from [technical insight].
+
+Here's what's likely happening: [Brief technical explanation that shows expertise]
+
+I've implemented [specific solution/pattern] for this exact scenario on [#] projects. The approach:
+
+**Architecture:** [Specific technical approach]
+**Key Considerations:** [Technical details that matter]
+- [Technical point 1 with reasoning]
+- [Technical point 2 with reasoning]
+- [Technical point 3 with reasoning]
+
+**Performance Impact:** [Expected improvement with metrics]
+
+My background: [Specific technical credentials/experience]. I specialize in [technical specialty] and I'm particularly experienced with [relevant technologies].
+
+Recent technical challenge I solved: [Brief technical case study with outcome]
+
+I use [specific methodology/best practices] which ensures [technical benefit].
+
+Technical question: Are you planning to [specific technical consideration]? That would affect the [technical aspect] of the implementation.
+
+Portfolio/GitHub: [link]
+
+Let's discuss the technical approach in detail.`,
+    successRate: 89,
+    tags: ["technical", "expert", "engineering", "architecture", "specialized"],
+    tone: "technical",
+  },
 ];
 
 // Get all templates

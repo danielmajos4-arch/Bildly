@@ -106,17 +106,113 @@ function getToneInstructions(tone: string | undefined): { style: string; guideli
 - End with a strong, confident call-to-action that creates urgency
 - Don't be afraid to be slightly provocative or challenge assumptions`
     },
+    technical: {
+      style: "Expert, detailed, and methodology-driven. Use technical terminology appropriately. Demonstrate deep technical understanding. Analytical and precise.",
+      guidelines: `
+**TECHNICAL/EXPERT TONE REQUIREMENTS:**
+- Lead with a specific technical insight from their job post
+- Use industry-specific terminology, frameworks, and methodologies naturally
+- Reference specific technologies, tools, or approaches they mentioned
+- Show technical depth without being condescending
+- Structure: Problem analysis → Technical approach → Credentials
+- Use phrases like "I noticed you're using [technology]", "The [technical challenge] you mentioned", "My approach would leverage [specific method]"
+- Include brief technical details that show expertise (architecture, patterns, best practices)
+- Reference technical standards, methodologies, or proven approaches
+- Address potential technical challenges proactively
+- End with a technical question or offer to discuss architecture/approach
+- Balance technical depth with readability - explain complex concepts clearly
+**OPENING PATTERNS:**
+- "I noticed you're using [specific tech stack] - the [specific challenge] you mentioned is exactly what I solved for..."
+- "Your requirement for [technical detail] suggests you need [specific approach]..."
+- "The [technical problem] you described typically stems from [insight] - here's how I'd address it..."
+- "As someone who specializes in [specific technical area], I immediately saw [technical observation]..."`
+    },
+    empathetic: {
+      style: "Understanding, supportive, and problem-focused. Acknowledge challenges and pain points. Show genuine care about their situation. Collaborative and reassuring.",
+      guidelines: `
+**EMPATHETIC/UNDERSTANDING TONE REQUIREMENTS:**
+- Open by acknowledging their pain point, challenge, or frustration
+- Use empathetic language: "I understand...", "You're probably dealing with...", "This sounds like..."
+- Focus on their feelings and frustrations before jumping to solutions
+- Show you've been in similar situations or helped others through them
+- Structure: Pain recognition → Shared experience → Supportive solution
+- Validate their concerns and show understanding
+- Use collaborative language: "together", "partnership", "support"
+- Be patient and thorough in explanations
+- Address fears or concerns proactively
+- Avoid being overly salesy - focus on helping first
+- End with a supportive offer and reassurance
+**OPENING PATTERNS:**
+- "Getting burned by [previous experience] is frustrating - I've helped [#] clients recover from exactly this..."
+- "I completely understand the challenge of [their pain point] - it's something I specialize in solving..."
+- "Dealing with [their problem] can feel overwhelming. Here's how I've helped others in your exact situation..."
+- "You're probably feeling [emotion] about [situation] - that's completely valid, and here's what we can do..."`
+    },
+    results_driven: {
+      style: "ROI-focused, metric-heavy, and outcome-oriented. Lead with numbers and measurable results. Business-minded and performance-focused. Direct about value delivered.",
+      guidelines: `
+**RESULTS-DRIVEN/ROI-FOCUSED TONE REQUIREMENTS:**
+- Open with a specific metric, percentage, or measurable outcome
+- Lead with the end result before explaining the process
+- Use numbers liberally: percentages, timeframes, quantities, ROI
+- Structure: Result preview → Proof (past metrics) → Process → Expected outcome
+- Focus on business impact: revenue, conversions, efficiency, cost savings
+- Use phrases like "increased by X%", "delivered in X days", "generated $X", "improved by X"
+- Emphasize speed and efficiency alongside quality
+- Include specific timeframes for deliverables
+- Show track record with concrete numbers
+- Make value proposition crystal clear and quantifiable
+- End with a result-oriented CTA that focuses on outcomes
+**OPENING PATTERNS:**
+- "Last month I increased a similar [client type]'s [metric] by X% in [timeframe] - here's exactly how I'd do it for you..."
+- "Quick stats: [X] projects delivered, [Y]% average improvement, [Z] week average timeline. Here's what that means for your project..."
+- "In the past [timeframe], I've helped [#] clients achieve [specific result]. Your project needs [specific outcome]..."
+- "Bottom line: I can deliver [specific result] in [timeframe]. Here's the proof and process..."`
+    },
   };
   return tones[tone || "friendly"] || tones.friendly;
 }
 
-// Helper function to get platform-specific tone
+// Helper function to get platform-specific tone and optimization tactics
 function getPlatformTone(platform: string): string {
   const tones: Record<string, string> = {
-    "Upwork": "Professional but personable. Upwork clients appreciate thoroughness and clarity. Show you read their job post carefully.",
-    "Fiverr": "Friendly and energetic. Fiverr is more casual. Be enthusiastic and show personality.",
-    "Freelancer": "Competitive and value-focused. Freelancer.com clients often compare many proposals. Stand out with specifics.",
-    "Other": "Professional and adaptable. Mirror the client's tone from their job post.",
+    "Upwork": `**UPWORK-SPECIFIC OPTIMIZATION:**
+- Longer proposals (300-400 words) perform better on Upwork
+- Start with specific job post reference - show you read carefully
+- Professional but personable tone works best
+- Address budget and timeline explicitly if mentioned
+- Include relevant Upwork stats if you have them (JSS, earnings, reviews)
+- Upwork clients appreciate thoroughness and detail
+- Use structured paragraphs with clear flow
+- Reference their specific requirements one by one`,
+    
+    "Fiverr": `**FIVERR-SPECIFIC OPTIMIZATION:**
+- Shorter, punchier proposals (200-300 words) work better
+- More enthusiastic and energetic language
+- Emphasize fast delivery and quick turnaround
+- Use emojis sparingly but strategically (1-2 max)
+- Friendly, approachable tone is preferred
+- Fiverr buyers appreciate personality and energy
+- Focus on packages and clear deliverables
+- Mention response time and revision policy`,
+    
+    "Freelancer": `**FREELANCER.COM-SPECIFIC OPTIMIZATION:**
+- Competitive positioning - acknowledge you're one of many bids
+- Value-focused language - emphasize ROI and cost-effectiveness
+- Clear milestone breakdown helps
+- Results-driven or bold tone often works best
+- Clients here compare many proposals - stand out with specifics
+- Address their budget concerns directly
+- Show you understand competitive landscape
+- Emphasize unique value proposition`,
+    
+    "Other": `**GENERAL PLATFORM OPTIMIZATION:**
+- Professional and adaptable approach
+- Mirror the client's tone from their job post
+- If formal post → professional tone, if casual → friendly tone
+- Focus on their specific needs and requirements
+- Be clear about deliverables and timeline
+- Adapt length based on project complexity (250-400 words)`,
   };
   return tones[platform] || tones["Other"];
 }
@@ -288,7 +384,19 @@ ${selectedTone === "professional" ? `   • "I noticed your requirement for [spe
    • "I'll cut to the chase: your [specific requirement] is literally my specialty..."
    • "You need [specific outcome]? That's what I deliver, consistently..."
    • "Let me be direct: I saw your post about [specific thing] and I know I can nail this..."
-   • "My portfolio speaks for itself: ${userProfile.portfolio || "[portfolio]"}. Now let me tell you exactly what I'll deliver..."` : `   • "Your [specific thing from job post] caught my eye because..."
+   • "My portfolio speaks for itself: ${userProfile.portfolio || "[portfolio]"}. Now let me tell you exactly what I'll deliver..."` : selectedTone === "technical" ? `   • "I noticed you're using [specific tech stack] - the [specific technical challenge] you mentioned is exactly what I solved for..."
+   • "Your requirement for [technical detail] suggests you need [specific technical approach]..."
+   • "The [technical problem] you described typically stems from [technical insight] - here's how I'd address it..."
+   • "As someone who specializes in [technical area], I immediately saw [technical observation about their project]..."
+   • "I caught the mention of [framework/tool] - there are some optimization patterns that would work perfectly here..."` : selectedTone === "empathetic" ? `   • "Getting burned by [previous bad experience mentioned] is frustrating - I've helped [#] clients recover from exactly this..."
+   • "I completely understand the challenge of [their pain point] - it's something I specialize in solving..."
+   • "Dealing with [their problem] can feel overwhelming. Here's how I've helped others in your exact situation..."
+   • "You're probably feeling [emotion] about [situation] - that's completely valid, and here's what we can do..."
+   • "I can tell from your post that [pain point] has been frustrating. I've been there, and I know how to fix it..."` : selectedTone === "results_driven" ? `   • "Last month I increased a similar [client type]'s [metric] by [X]% in [timeframe] - here's exactly how I'd do it for you..."
+   • "Quick stats: [X] projects delivered, [Y]% average improvement, [Z] week average timeline. Here's what that means for your project..."
+   • "In the past [timeframe], I've helped [#] clients achieve [specific result]. Your project needs [specific outcome]..."
+   • "Bottom line: I can deliver [specific result] in [timeframe]. Here's the proof and process..."
+   • "Real numbers: [specific metric improvement] achieved for [similar client]. I'd apply the same system to your [project]..."` : `   • "Your [specific thing from job post] caught my eye because..."
    • "Not gonna lie - I got excited when I saw you need [specific requirement]..."
    • "I just finished a similar [project type] and your post made me want to jump in..."
    • "Quick thought on your [specific challenge]: what if we approached it by..."
@@ -334,24 +442,39 @@ CRITICAL STYLE GUIDELINES:
 - NO placeholder text like [Your Name], [Project Name], [Timeline]
 ${toneInstructions.guidelines}
 
-**BANNED PHRASES - NEVER USE THESE (they scream "AI-generated" or "template"):**
+**BANNED PHRASES - NEVER USE THESE (research-confirmed red flags that scream "template" or "AI-generated"):**
   • "I am interested in your project"
   • "I came across your project"
   • "I am reaching out regarding"
   • "I noticed you are looking for"
   • "I believe I am the perfect fit"
-  • "I have X years of experience"
+  • "I am the perfect fit"
+  • "I have X years of experience" (unless with specific relevant example)
   • "I can deliver high-quality work"
+  • "I guarantee quality work"
   • "I am a skilled professional"
+  • "I am a hardworking professional"
   • "I would love to work with you"
   • "I am confident that I can"
   • "I am excited about the opportunity"
   • "Looking forward to hearing from you"
   • "Please feel free to reach out"
+  • "Please consider my proposal"
+  • "I am very interested in this project"
   • "I am the right candidate"
   • "Dear Hiring Manager" or "Dear Sir/Madam"
   • "Hope this message finds you well"
   • "I hope to hear from you soon"
+  
+**POWER PHRASES TO ENCOURAGE (research-backed phrases that convert):**
+  • "I noticed you specifically mentioned [exact detail from post]..."
+  • "Last [timeframe] I helped [similar client type] achieve [specific result with numbers]..."
+  • "Here's exactly how I'd approach [their specific challenge]..."
+  • "Quick question about your [specific requirement they mentioned]..."
+  • "Would [specific solution approach] work for your [timeline/budget/situation]?"
+  • "The [specific thing they mentioned] tells me you need [insight]..."
+  • "I've delivered [specific similar outcome] for [similar client] - here's the approach..."
+  • "Your [specific detail] caught my attention because [relevant experience]..."
 
 **HUMANIZATION RULES (Adapted for ${selectedTone.toUpperCase()} tone):**
 - EVERY sentence should feel personal and specific to THIS job
@@ -368,6 +491,28 @@ ${selectedTone === "professional" ? `- Limit contractions - use "I am", "I will"
 - Reference something from their post that shows you ACTUALLY read it
 
 ═══════════════════════════════════════════════════════
+🧠 PSYCHOLOGY TRIGGERS (Research-backed conversion tactics - use naturally):
+═══════════════════════════════════════════════════════
+1. **Social Proof** (increases conversion 73%) - Mention similar clients helped, number of projects, satisfaction rates
+   - "I've helped [#] similar [client type] achieve [result]..."
+   - "My [similar project type] clients typically see [outcome]..."
+   
+2. **Reciprocity** - Offer valuable insight upfront before asking for anything
+   - "Quick observation: [specific insight about their project]"
+   - "Pro tip for your [requirement]: [helpful advice]"
+   - Give them something useful in the proposal itself
+   
+3. **Authority** - Establish credibility naturally (not bragging)
+   - "As someone who's [specific relevant credential/experience]..."
+   - "After [specific achievement], I learned that [insight]..."
+   - "My approach with [methodology] has consistently [result]..."
+   
+4. **Scarcity (Subtle)** - Create natural urgency about your availability
+   - "I have availability starting [specific date]"
+   - "Currently working with [#] clients, can start [timeframe]"
+   - "My calendar opens up [when] if timing aligns"
+
+═══════════════════════════════════════════════════════
 🎯 WOW FACTOR TECHNIQUES (Use at least 2):
 ═══════════════════════════════════════════════════════
 1. **Mirror their language** - Use exact phrases from their job post
@@ -378,6 +523,8 @@ ${selectedTone === "professional" ? `- Limit contractions - use "I am", "I will"
 6. **Empathy statement** - Show you understand their frustration or goal
 7. **Micro-commitment** - End with an easy "yes" question, not a big ask
 8. **Value-first** - Give them a useful insight before asking for anything
+9. **"You attitude" over "I attitude"** - Focus on their benefits, not your skills (67% better response)
+10. **Questions in CTA** - End with relevant question, not statement (67% boost in responses)
 
 ═══════════════════════════════════════════════════════
 ⚠️ FINAL CHECK BEFORE WRITING:
@@ -1140,7 +1287,7 @@ Key points to mention in each variant:
 ${args.customContext.keyPoints.map(point => `• ${point}`).join("\n")}` : ""}
 ` : "";
 
-    const prompt = `You are writing 3 different proposal variants AS the freelancer described below. Each variant should have a distinct tone while maintaining professionalism and personalization.
+    const prompt = `You are writing 6 different proposal variants AS the freelancer described below. Each variant has a DISTINCT tone optimized for different client types and situations.
 
 ═══════════════════════════════════════════════════════
 FREELANCER PROFILE:
@@ -1160,22 +1307,34 @@ ${args.jobDescription}
 """
 ${customContextSection}
 ═══════════════════════════════════════════════════════
-YOUR TASK - GENERATE 3 PROPOSAL VARIANTS:
+YOUR TASK - GENERATE 6 PROPOSAL VARIANTS:
 ═══════════════════════════════════════════════════════
 
-Create 3 distinct proposals with different tones:
+Create 6 distinct proposals with different tones:
 
-1. **PROFESSIONAL** - Formal, polished, business-focused
+1. **PROFESSIONAL** 💼 - Formal, polished, business-focused
    - Industry terminology, structured approach
    - Best for: Corporate clients, enterprise projects
 
-2. **FRIENDLY** - Warm, conversational, approachable  
+2. **FRIENDLY** 👋 - Warm, conversational, approachable  
    - Uses "you/we" language, casual but competent
    - Best for: Startups, small businesses, creative projects
 
-3. **BOLD** - Confident, direct, results-focused
+3. **BOLD** ⚡ - Confident, direct, results-focused
    - Leads with capabilities, assertive tone
    - Best for: Competitive bids, clients who value confidence
+
+4. **TECHNICAL** 🔧 - Expert, detailed, methodology-driven
+   - Technical terminology, frameworks, specific approaches
+   - Best for: Engineering teams, technical projects, developers
+
+5. **EMPATHETIC** 💙 - Understanding, problem-focused, supportive
+   - Acknowledges pain points, shows genuine care
+   - Best for: Clients with challenges, past bad experiences
+
+6. **RESULTS-DRIVEN** 📈 - ROI-focused, metric-heavy, outcome-oriented
+   - Leads with numbers, percentages, measurable outcomes
+   - Best for: Business clients, competitive situations, ROI-focused clients
 
 **CHARACTER LIMIT: Each variant must be approximately ${args.customContext?.characterLimit || 1500} characters**
 
@@ -1184,7 +1343,7 @@ Each proposal should:
 - Reference specifics from the job post - use their exact words
 - Include a clear call-to-action
 - Sound 100% human - NEVER sound AI-generated
-- Use different opening strategies for each variant
+- Use different opening strategies for each tone
 - NO placeholder text like [Your Name]
 ${userProfile.portfolio ? `- Naturally mention portfolio: ${userProfile.portfolio}` : ""}
 
@@ -1192,6 +1351,9 @@ ${userProfile.portfolio ? `- Naturally mention portfolio: ${userProfile.portfoli
 - Professional: Lead with expertise and structured methodology
 - Friendly: Lead with connection and shared understanding  
 - Bold: Lead with a confident claim or pattern-interrupt
+- Technical: Lead with specific technical insight from job post
+- Empathetic: Acknowledge their pain point or challenge first
+- Results-Driven: Open with a specific metric or outcome
 
 Respond in this exact JSON format:
 {
@@ -1206,6 +1368,18 @@ Respond in this exact JSON format:
   "bold": {
     "content": "Full proposal text here...",
     "bestFor": "Competitive bids, confident clients"
+  },
+  "technical": {
+    "content": "Full proposal text here...",
+    "bestFor": "Engineering teams, technical projects"
+  },
+  "empathetic": {
+    "content": "Full proposal text here...",
+    "bestFor": "Clients with challenges, past bad experiences"
+  },
+  "results_driven": {
+    "content": "Full proposal text here...",
+    "bestFor": "Business clients, ROI-focused"
   }
 }`;
 
@@ -1218,7 +1392,7 @@ Respond in this exact JSON format:
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 3000,
+        max_tokens: 5000,
         messages: [{ role: "user", content: prompt }],
       }),
     });

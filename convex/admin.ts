@@ -1,45 +1,85 @@
-/**
- * Admin / support helpers — not callable from the public client.
- *
- * Finding which account saved a proposal (dashboard, no code):
- * 1. Convex Dashboard → Data → `proposals`
- * 2. Find a row whose `generatedProposal` contains a rare substring (e.g. `retainly.dev`)
- * 3. Copy `userId` → open `users` → match `_id` → read `email`, `name`, `clerkId`
- *
- * CLI (same deployment as your dev/prod):
- *   npx convex run internal/admin:findProposalBySnippet '{"searchSnippet":"retainly.dev"}'
- *
- * Remove or restrict this module if you no longer need server-side substring search.
- */
-import { internalQuery } from "./_generated/server";
+import { query } from "./_generated/server";
 import { v } from "convex/values";
 
-export const findProposalBySnippet = internalQuery({
-  args: { searchSnippet: v.string() },
+export const getAdminStats = query({
+  args: { refreshToken: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const needle = args.searchSnippet.trim();
-    if (!needle) return [];
+    void args.refreshToken;
+    const identity = await ctx.auth.getUserIdentity();
 
-    const proposals = await ctx.db.query("proposals").collect();
-    const matches = proposals.filter((p) =>
-      p.generatedProposal.includes(needle),
-    );
+    // Only allow specific admin emails
+    const ADMIN_EMAILS = [
+      "danielmajos4@gmail.com",
+    ];
 
-    const results = [];
-    for (const p of matches) {
-      const user = await ctx.db.get(p.userId);
-      results.push({
-        proposalId: p._id,
-        userId: p.userId,
-        createdAt: p.createdAt,
-        jobTitle: p.jobTitle,
-        platform: p.platform,
-        userEmail: user?.email ?? null,
-        userName: user?.name ?? null,
-        clerkId: user?.clerkId ?? null,
-      });
+    if (!identity || !ADMIN_EMAILS.includes(identity.email || "")) {
+      throw new Error("Unauthorized - Admin access only");
     }
 
-    return results;
+    // Get all users
+    const allUsers = await ctx.db.query("users").collect();
+
+    // Get all proposals
+    const allProposals = await ctx.db.query("proposals").collect();
+
+    // Calculate stats
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const newUsersToday = allUsers.filter((u) =>
+      new Date(u._creationTime) >= today,
+    ).length;
+
+    const newUsersThisWeek = allUsers.filter((u) =>
+      new Date(u._creationTime) >= thisWeek,
+    ).length;
+
+    const proposalsToday = allProposals.filter((p) =>
+      new Date(p.createdAt) >= today,
+    ).length;
+
+    const proposalsThisWeek = allProposals.filter((p) =>
+      new Date(p.createdAt) >= thisWeek,
+    ).length;
+
+    // Get top users by proposal count
+    const userProposalCounts = allUsers
+      .map((user) => {
+        const proposalCount = allProposals.filter((p) => p.userId === user._id)
+          .length;
+        return {
+          email: user.email,
+          name: user.name,
+          proposalCount,
+          plan: user.plan,
+          createdAt: user._creationTime,
+        };
+      })
+      .sort((a, b) => b.proposalCount - a.proposalCount)
+      .slice(0, 10);
+
+    // Count proposals by niche
+    const nicheBreakdown: Record<string, number> = {};
+    allProposals.forEach((p) => {
+      const niche = p.profession || "Unknown";
+      nicheBreakdown[niche] = (nicheBreakdown[niche] || 0) + 1;
+    });
+
+    return {
+      totalUsers: allUsers.length,
+      totalProposals: allProposals.length,
+      newUsersToday,
+      newUsersThisWeek,
+      proposalsToday,
+      proposalsThisWeek,
+      avgProposalsPerUser:
+        allUsers.length > 0
+          ? (allProposals.length / allUsers.length).toFixed(2)
+          : "0",
+      topUsers: userProposalCounts,
+      nicheBreakdown,
+      lastUpdated: new Date().toISOString(),
+    };
   },
 });

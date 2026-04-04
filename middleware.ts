@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// Define which routes are public (don't require auth)
+// Define which routes are public (don't require auth).
+// All other routes (e.g. /dashboard, /admin) require sign-in via auth.protect().
 const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
